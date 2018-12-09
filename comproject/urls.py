@@ -4,6 +4,6 @@ from django.conf.urls import url, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^upload/', include('upload.urls'))
+    url(r'^music/', include('music.urls'))
 
 ]
