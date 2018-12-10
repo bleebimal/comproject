@@ -10,3 +10,11 @@
 {#    {% endfor %}#}
 {#</ul>#}
 
+{% if error_message %}
+    <p><strong>{{ error_message }}</strong></p>
+{% endif %}
+
+<form action="{% url 'music:favorite' album.id %}" method="POST">
+    {% csrf_token %}
+
+</form>
