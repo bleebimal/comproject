@@ -4,6 +4,7 @@ from .models import Album, Song
 # from django.template import loader
 from django.shortcuts import render, get_object_or_404
 
+
 def index(request):
 
     all_albums = Album.objects.all()
@@ -11,6 +12,7 @@ def index(request):
 
     # return HttpResponse(template.render(context, request))
     return render(request, 'music/index.html', {'all_albums': all_albums})
+
 
 def detail(request, album_id):
     # try:
@@ -23,16 +25,21 @@ def detail(request, album_id):
 
     return render(request, 'music/detail.html', {'album': album})
 
-def favorite(request,album_id):
+
+def favorite(request, album_id):
     album = get_object_or_404(Album, id=album_id)
     try:
-        selected_song = album.song_set.all(id=request.POST['song'])
+        selected_song = album.song_set.get(id=request.POST['song'])
     except (KeyError, Song.DoesNotExist):
-        return render(request, 'music/detail.html',{
-            'album':album,
-            'error_message': 'Nothing is here'
+        return render(request, 'music/detail.html', {
+            'album': album,
+            'error_message': "Nothing is here",
         })
     else:
-        selected_song.is_favorite = True
+        if selected_song.is_favorite:
+            selected_song.is_favorite = False
+        else:
+            selected_song.is_favorite = True
         selected_song.save()
-        return render(request, 'music/detail.html', {'album':album})
+        return render(request, 'music/detail.html', {'album': album})
+

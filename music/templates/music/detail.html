@@ -14,15 +14,15 @@
     <p><strong>{{ error_message }}</strong></p>
 {% endif %}
 
-<form action="{% url 'music:favorite' album.id %}" method="POST">
+<form action="{% url 'music:favorite' album.id %}" method="post">
     {% csrf_token %}
-    {% for song in Album.song_set.all %}
+    {% for song in album.song_set.all %}
         <input type="radio" id="song{{ forloop.counter }}" name="song" value="{{ song.id }}" />
         <label for = "song{{ forloop.counter }}">
             {{ song.song_title }}
 
             {% if song.is_favorite %}
-                <img src="http://chittagongit.com//images/small-star-icon/small-star-icon-11.jpg"/>
+                <img src="http://icons.iconarchive.com/icons/paomedia/small-n-flat/16/star-icon.png"/>
             {% endif %}
         </label><br>
     {% endfor %}
