@@ -76,7 +76,7 @@ def logout_view(request):
 # In the urls of website NOT MUSIC.URLS website.urls add the below code
 #
 # from django.contrib.auth import views
-# 
+#
 # url(r'^accounts/login/$', views.login, name='login'),
 #     url(r'^accounts/logout/$', views.logout, name='logout', kwargs={ 'next_page' : '/'  }),
 #
