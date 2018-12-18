@@ -1,7 +1,11 @@
-from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Album
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate,login, logout
+from django.views import generic
+from django.views.generic import View
+from .forms import UserForm
 
 class IndexView(generic.ListView):
     template_name = 'music/index.html'
@@ -28,66 +32,84 @@ class AlbumDelete(DeleteView):
     success_url = reverse_lazy('music:index')
 
 
+class UserFormView(View):
+    form_class = UserForm
+    template_name = 'music/registration_form.html'
+
+    #Display Blank Form
+    def get(self, request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+
+            user = form.save(commit=False)
+
+            #cleaned (normalized) data
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user.set_password(password)
+            user.save()
 
 
+            #returns User Object if credentials are correct
+            user = authenticate(username=username, password=password)
 
 
+            if user is not None:
+
+                if user.is_active:
+                    login(request, user)
+                    return redirect('music:index')
+
+        return render(request, self.template_name, {'form': form})
 
 
+def logout_view(request):
+    logout(request)
+    return redirect('music:index')
 
-
-
-
-
-
-
-
-
-
-
-
-# from django.http import Http404
-# #from django.http import HttpResponse
-# from .models import Album, Song
-# # from django.template import loader
-# from django.shortcuts import render, get_object_or_404
+# For Login and Logout buttons
+# In the urls of website NOT MUSIC.URLS website.urls add the below code
+#
+# from django.contrib.auth import views
+# 
+# url(r'^accounts/login/$', views.login, name='login'),
+#     url(r'^accounts/logout/$', views.logout, name='logout', kwargs={ 'next_page' : '/'  }),
 #
 #
-# def index(request):
+# then in your base.html add a " if statement"
+# in your navbar by adding one more <li>
 #
-#     all_albums = Album.objects.all()
-#     # template = loader.get_template('music/index.html')
+# {% If the user.is_authenticated %}
+#         <li> <a href="/accounts/login/">LOGON</a><li>
+# {% else %}
+#           <li><a href="/accounts/logout/">LOGOUT</a><li>
 #
-#     # return HttpResponse(template.render(context, request))
-#     return render(request, 'music/index.html', {'all_albums': all_albums})
+# make a new directory in templates called Registration. so templates will now have 2 directories music and Registration
+# In that make new html page call in login.html
 #
+# {% extends 'blog/base.html' %}
+# {% block body%}
+#   <div class="jumbotron">
 #
-# def detail(request, album_id):
-#     # try:
-#     #     album = Album.objects.get(id=album_id)
-#     #
-#     # except Album.DoesNotExist:
-#     #     raise Http404("The Page Does not Exist")
+#     <h2>Please Login: </h2>
+#     <h3>(Must be SuperUser, please check admin for issues.)</h3>
+#     {% if form.errors %}
+#         <p>Your username and password didn't match.Please try again!</p>
+#     {% endif %}
 #
-#     album = get_object_or_404(Album, id=album_id)
+#     <form method="POST" action="{% url 'login' %}">
+#     {% csrf_token %}
+#         {{form.as_p}}
 #
-#     return render(request, 'music/detail.html', {'album': album})
-#
-#
-# def favorite(request, album_id):
-#     album = get_object_or_404(Album, id=album_id)
-#     try:
-#         selected_song = album.song_set.get(id=request.POST['song'])
-#     except (KeyError, Song.DoesNotExist):
-#         return render(request, 'music/detail.html', {
-#             'album': album,
-#             'error_message': "Nothing is here",
-#         })
-#     else:
-#         if selected_song.is_favorite:
-#             selected_song.is_favorite = False
-#         else:
-#             selected_song.is_favorite = True
-#         selected_song.save()
-#         return render(request, 'music/detail.html', {'album': album})
+#         <input type="submit" class='btn btn-primary' value="Login" />
+#         <input type="hidden" name="next" value="{{ next }}" />
+#     </form>
+#   </div>
+# {% endblock %}
+
 
